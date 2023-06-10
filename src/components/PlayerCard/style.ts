@@ -9,6 +9,7 @@ export const PlayerContainer = styled.View`
   flex-direction: row;
   align-items: center;
   margin-bottom: 16px;
+  border-radius: 6px;
 `
 
 export const PlayerName = styled.Text`

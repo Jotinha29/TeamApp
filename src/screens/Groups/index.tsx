@@ -22,6 +22,7 @@ export function Groups() {
           <ListInput message="How about registering the first class" />
         )}
         contentContainerStyle={groups.length === 0 && { flex: 1 }}
+        showsVerticalScrollIndicator={false}
       />
       <Button title="Create new team" />
     </S.Container>
