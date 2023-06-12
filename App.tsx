@@ -1,15 +1,14 @@
-import { Groups } from '@screens/Groups'
 import { ThemeProvider } from 'styled-components'
 import defaultTheme from './src/theme'
-import { StatusBar } from 'react-native'
+import { SafeAreaView, StatusBar } from 'react-native'
 import {
   useFonts,
   Roboto_400Regular,
   Roboto_700Bold,
 } from '@expo-google-fonts/roboto'
 import { Loading } from '@components/Loading'
-import { NewGroup } from '@screens/NewGroup'
-import { Players } from '@screens/Players'
+import { Routes } from './src/Routes'
+import React from 'react'
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -18,9 +17,11 @@ export default function App() {
   })
 
   return (
-    <ThemeProvider theme={defaultTheme}>
-      <StatusBar barStyle={'light-content'} translucent />
-      {fontsLoaded ? <Players /> : <Loading />}
-    </ThemeProvider>
+    <SafeAreaView>
+      <ThemeProvider theme={defaultTheme}>
+        <StatusBar barStyle={'light-content'} translucent />
+        {fontsLoaded ? <Routes /> : <Loading />}
+      </ThemeProvider>
+    </SafeAreaView>
   )
 }

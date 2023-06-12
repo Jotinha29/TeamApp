@@ -6,9 +6,28 @@ import { useState } from 'react'
 import { FlatList } from 'react-native'
 import { ListInput } from '@components/ListInput'
 import { Button } from '@components/Button'
+import { useNavigation } from '@react-navigation/native'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 
-export function Groups() {
-  const [groups, setGroups] = useState([])
+interface RootParamList {
+  groups: undefined
+  newGroup: undefined
+  players: {
+    group: string
+  }
+}
+
+type GroupProps = {
+  navigation: NativeStackNavigationProp<RootParamList, 'groups'>
+}
+
+export function Groups({ navigation }: GroupProps) {
+  const [groups, setGroups] = useState([''])
+
+  function handleNewGroup() {
+    navigation.navigate('newGroup')
+  }
+
   return (
     <S.Container>
       <Header />
@@ -24,7 +43,7 @@ export function Groups() {
         contentContainerStyle={groups.length === 0 && { flex: 1 }}
         showsVerticalScrollIndicator={false}
       />
-      <Button title="Create new team" />
+      <Button title="Create new team" onPress={() => handleNewGroup} />
     </S.Container>
   )
 }
