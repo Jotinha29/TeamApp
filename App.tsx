@@ -1,6 +1,6 @@
 import { ThemeProvider } from 'styled-components'
 import defaultTheme from './src/theme'
-import { SafeAreaView, StatusBar } from 'react-native'
+import { StatusBar } from 'react-native'
 import {
   useFonts,
   Roboto_400Regular,
@@ -17,11 +17,9 @@ export default function App() {
   })
 
   return (
-    <SafeAreaView>
-      <ThemeProvider theme={defaultTheme}>
-        <StatusBar barStyle={'light-content'} translucent />
-        {fontsLoaded ? <Routes /> : <Loading />}
-      </ThemeProvider>
-    </SafeAreaView>
+    <ThemeProvider theme={defaultTheme}>
+      <StatusBar barStyle={'light-content'} translucent />
+      {fontsLoaded ? <Routes /> : <Loading />}
+    </ThemeProvider>
   )
 }

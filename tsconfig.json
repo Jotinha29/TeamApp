@@ -11,7 +11,7 @@
     "./src/components/*"
     ],
         "@screens/*":[
-      "./src/screens/*"
+      "src/Routes/screens/*"
     ],
         "@storage/*":[
       "./src/storage/*"

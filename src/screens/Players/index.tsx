@@ -9,14 +9,29 @@ import { useState } from 'react'
 import { PlayerCard } from '@components/PlayerCard'
 import { ListInput } from '@components/ListInput'
 import { Button } from '@components/Button'
+import { RouteProp, useRoute } from '@react-navigation/native'
+
+type RouteParams = {
+  group: string
+}
+
+type RootStackParamList = {
+  group: RouteParams
+  // Outras rotas
+}
 
 export function Players() {
   const [team, setTeam] = useState('Team Aa')
   const [players, setPlayers] = useState(['Matias'])
+
+  /* Routes */
+  const { params } = useRoute<RouteProp<RootStackParamList, 'group'>>()
+  const groupName = params?.group || ''
+
   return (
     <Container>
       <Header showBackButton />
-      <HighLight title="Group Name" subTitle="Add new participants" />
+      <HighLight title={groupName} subTitle="Add new participants" />
 
       <Forms>
         <Input placeholder="Person Name" autoCorrect={false} />
