@@ -4,12 +4,16 @@ import { HighLight } from '@components/HighLight'
 import { ButtonIcon } from '@components/ButtonIcon'
 import { Input } from '@components/Input'
 import { Filter } from '@components/FIlter'
-import { FlatList } from 'react-native'
-import { useState } from 'react'
+import { Alert, FlatList } from 'react-native'
+import { useEffect, useState } from 'react'
 import { PlayerCard } from '@components/PlayerCard'
 import { ListInput } from '@components/ListInput'
 import { Button } from '@components/Button'
 import { RouteProp, useRoute } from '@react-navigation/native'
+import { AppError } from '@utils/AppError'
+import { PlayerAddByGroup } from '@storage/players/playerAddByGroup'
+import { GetPlayersByGroupAndTeam } from '@storage/players/getPlayersByGroup&Team'
+import { PlayerStorageDTO } from '@storage/players/PlayerStorageDTO'
 
 type RouteParams = {
   group: string
@@ -22,20 +26,57 @@ type RootStackParamList = {
 
 export function Players() {
   const [team, setTeam] = useState('Team Aa')
-  const [players, setPlayers] = useState(['Matias'])
+  const [players, setPlayers] = useState<PlayerStorageDTO[]>([])
+  const [playerName, setPlayerName] = useState('')
 
   /* Routes */
   const { params } = useRoute<RouteProp<RootStackParamList, 'group'>>()
   const groupName = params?.group || ''
 
+  async function hanldeAddPlayer() {
+    if (playerName.trim().length === 0) {
+      return Alert.alert('New Player 🎮', 'Please inform an name')
+    }
+    const newPlayer = {
+      name: playerName,
+      team,
+    }
+    try {
+      await PlayerAddByGroup(newPlayer, groupName)
+      fetchPlayersByTeam()
+    } catch (error) {
+      if (error instanceof AppError) {
+        return Alert.alert('New Player 🎮', error.message)
+      } else {
+        console.log(error)
+      }
+    }
+  }
+
+  async function fetchPlayersByTeam() {
+    try {
+      const playersByTeam = await GetPlayersByGroupAndTeam(groupName, team)
+      setPlayers(playersByTeam)
+    } catch (error) {
+      console.log(error)
+      Alert.alert('Players 💻', 'Unhandle to load teams')
+    }
+  }
+  useEffect(() => {
+    fetchPlayersByTeam()
+  }, [team])
   return (
     <Container>
       <Header showBackButton />
       <HighLight title={groupName} subTitle="Add new participants" />
 
       <Forms>
-        <Input placeholder="Person Name" autoCorrect={false} />
-        <ButtonIcon iconName="add" />
+        <Input
+          placeholder="Person Name"
+          autoCorrect={false}
+          onChangeText={setPlayerName}
+        />
+        <ButtonIcon iconName="add" onPress={hanldeAddPlayer} />
       </Forms>
       <HeaderList>
         <FlatList
@@ -55,9 +96,9 @@ export function Players() {
 
       <FlatList
         data={players}
-        keyExtractor={(item) => item}
+        keyExtractor={(item) => item.name}
         renderItem={({ item }) => (
-          <PlayerCard name={item} onRemove={() => {}} />
+          <PlayerCard name={item.name} onRemove={() => {}} />
         )}
         ListEmptyComponent={() => (
           <ListInput message="Thera are no people on this team" />
