@@ -4,16 +4,18 @@ import { HighLight } from '@components/HighLight'
 import { ButtonIcon } from '@components/ButtonIcon'
 import { Input } from '@components/Input'
 import { Filter } from '@components/FIlter'
-import { Alert, FlatList } from 'react-native'
-import { useEffect, useState } from 'react'
+import { Alert, FlatList, TextInput } from 'react-native'
+import { useEffect, useRef, useState } from 'react'
 import { PlayerCard } from '@components/PlayerCard'
 import { ListInput } from '@components/ListInput'
 import { Button } from '@components/Button'
-import { RouteProp, useRoute } from '@react-navigation/native'
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native'
 import { AppError } from '@utils/AppError'
 import { PlayerAddByGroup } from '@storage/players/playerAddByGroup'
 import { GetPlayersByGroupAndTeam } from '@storage/players/getPlayersByGroup&Team'
 import { PlayerStorageDTO } from '@storage/players/PlayerStorageDTO'
+import { RemovePlayerByGroup } from '@storage/players/removePlayerByGroup'
+import { RemoveGroupByName } from '@storage/group/removeGroupByName'
 
 type RouteParams = {
   group: string
@@ -28,7 +30,8 @@ export function Players() {
   const [team, setTeam] = useState('Team Aa')
   const [players, setPlayers] = useState<PlayerStorageDTO[]>([])
   const [playerName, setPlayerName] = useState('')
-
+  const playerNameInputRef = useRef<TextInput>(null)
+  const { navigate } = useNavigation()
   /* Routes */
   const { params } = useRoute<RouteProp<RootStackParamList, 'group'>>()
   const groupName = params?.group || ''
@@ -43,6 +46,9 @@ export function Players() {
     }
     try {
       await PlayerAddByGroup(newPlayer, groupName)
+      /* usando ref para tirar o foco, entao o teclado sai */
+      playerNameInputRef.current?.blur()
+      setPlayerName('')
       fetchPlayersByTeam()
     } catch (error) {
       if (error instanceof AppError) {
@@ -51,6 +57,36 @@ export function Players() {
         console.log(error)
       }
     }
+  }
+  async function handleRemovePlayer(playerName: string) {
+    try {
+      await RemovePlayerByGroup(playerName, groupName)
+      fetchPlayersByTeam()
+    } catch (error) {
+      console.log(error)
+      Alert.alert('Remove Player 🎮', 'Not possible to remove this player')
+    }
+  }
+  async function onRemoveGroup() {
+    try {
+      await RemoveGroupByName(groupName)
+      fetchPlayersByTeam()
+      navigate('groups')
+    } catch (error) {
+      console.log(error)
+      Alert.alert('Remove Group 🎮', 'Not possible to remove this group')
+    }
+  }
+  async function handleRemoveGroup(groupName: string) {
+    Alert.alert('Remove ❌', 'Really want to remove this team?', [
+      { text: 'No', style: 'cancel' },
+      {
+        text: 'Yes',
+        onPress: () => {
+          onRemoveGroup()
+        },
+      },
+    ])
   }
 
   async function fetchPlayersByTeam() {
@@ -72,9 +108,14 @@ export function Players() {
 
       <Forms>
         <Input
+          inputRef={playerNameInputRef}
           placeholder="Person Name"
           autoCorrect={false}
           onChangeText={setPlayerName}
+          value={playerName}
+          /* botao de enter do teclado */
+          onSubmitEditing={hanldeAddPlayer}
+          returnKeyType="done"
         />
         <ButtonIcon iconName="add" onPress={hanldeAddPlayer} />
       </Forms>
@@ -98,7 +139,12 @@ export function Players() {
         data={players}
         keyExtractor={(item) => item.name}
         renderItem={({ item }) => (
-          <PlayerCard name={item.name} onRemove={() => {}} />
+          <PlayerCard
+            name={item.name}
+            onRemove={() => {
+              handleRemovePlayer(item.name)
+            }}
+          />
         )}
         ListEmptyComponent={() => (
           <ListInput message="Thera are no people on this team" />
@@ -109,7 +155,11 @@ export function Players() {
           players.length === 0 && { flex: 1 },
         ]}
       />
-      <Button title="Remove team" type="SECONDARY" />
+      <Button
+        title="Remove team"
+        type="SECONDARY"
+        onPress={() => handleRemoveGroup(groupName)}
+      />
     </Container>
   )
 }
