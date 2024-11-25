@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "igniteteams",
-    "slug": "igniteteams",
+    "name": "teamapp",
+    "slug": "teamapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
